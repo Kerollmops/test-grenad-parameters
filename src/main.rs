@@ -6,7 +6,7 @@ use std::time::{Duration, Instant};
 
 use clap::Parser;
 use grenad::{CompressionType, Reader, WriterBuilder};
-use indicatif::ParallelProgressIterator;
+use indicatif::{ParallelProgressIterator, ProgressBar, ProgressStyle};
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 use rayon::prelude::*;
@@ -74,16 +74,20 @@ fn main() -> anyhow::Result<()> {
     }
 
     println!("generating the test files...");
+    let pb = ProgressBar::new(parameters.len() as u64)
+        .with_style(ProgressStyle::default_bar().template("{wide_bar} {pos}/{len} {eta}"));
     let params_files = parameters
         .into_par_iter()
         .map(|params| {
             let mut rng = StdRng::seed_from_u64(seed);
             generate_from_params(&mut rng, &folder, &params, entry_count).map(|file| (params, file))
         })
-        .progress()
+        .progress_with(pb)
         .collect::<anyhow::Result<Vec<_>, _>>()?;
 
     println!("evaluating the test files...");
+    let pb = ProgressBar::new(params_files.len() as u64)
+        .with_style(ProgressStyle::default_bar().template("{wide_bar} {pos}/{len} {eta}"));
     let mut results = params_files
         .into_par_iter()
         .map(|(params, file)| {
@@ -91,10 +95,10 @@ fn main() -> anyhow::Result<()> {
             let (iter_elapsed, jump_elapsed) = test_cursor(&mut rng, file, entry_count)?;
             Ok((params, iter_elapsed, jump_elapsed))
         })
-        .progress()
+        .progress_with(pb)
         .collect::<anyhow::Result<Vec<_>>>()?;
 
-    results.sort_unstable_by_key(|(_, _iter_elapsed, jump_elapsed)| *jump_elapsed);
+    results.sort_unstable_by_key(|(_, iter_elapsed, jump_elapsed)| *iter_elapsed + *jump_elapsed);
 
     for (params, iter_elapsed, jump_elapsed) in results {
         println!("{:#?}", params);
