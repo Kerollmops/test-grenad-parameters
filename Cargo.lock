@@ -4,9 +4,9 @@ version = 3
 
 [[package]]
 name = "anyhow"
-version = "1.0.47"
+version = "1.0.48"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "38d9ff5d688f1c13395289f67db01d4826b46dd694e7580accdc3e8430f2d98e"
+checksum = "62e1f47f7dc0422027a4e370dd4548d4d66b26782e513e98dca1e689e058a80e"
 
 [[package]]
 name = "atty"
@@ -227,7 +227,7 @@ dependencies = [
 [[package]]
 name = "grenad"
 version = "0.4.1"
-source = "git+https://github.com/Kerollmops/grenad?branch=avoid-copying-too-much#6f51707ab18896ad92439a30ca4edd9381288751"
+source = "git+https://github.com/Kerollmops/grenad?branch=avoid-copying-too-much#6b777034273a38570cceec822bbfdf25f494ac52"
 dependencies = [
  "bytemuck",
  "byteorder",

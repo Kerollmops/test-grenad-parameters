@@ -18,7 +18,7 @@ use rayon::prelude::*;
 use roaring::RoaringBitmap;
 
 const FIVE_GIB: usize = 5 * 1024 * 1024 * 1024;
-const MAX_BITMAP_LEN: usize = 10_000;
+const MAX_BITMAP_LEN: usize = 116_000_000;
 const POSSIBLE_READ_METHODS: &[&str] =
     &["direct", "read-to-vec", "bufreader", "memory-mapped", "memory-mapped-bufreader"];
 const POSSIBLE_SORT_METHODS: &[&str] = &["iter-only", "iter-and-jump", "jump-only"];
@@ -729,6 +729,7 @@ fn generate_from_params<P: AsRef<Path>, R: io::Read + io::Seek>(
                 .index_key_interval(params.index_key_interval)
                 .build(BufWriter::new(file));
 
+            cursor.reset();
             while let Some((k, v)) = cursor.move_on_next()? {
                 writer.insert(k, v)?;
             }
@@ -755,6 +756,7 @@ fn generate_lmdb<P: AsRef<Path>, R: io::Read + io::Seek>(
     let pb = ProgressBar::new(cursor.len())
         .with_style(ProgressStyle::default_bar().template("{wide_bar} {pos}/{len} {eta}"));
 
+    cursor.reset();
     while let Some((k, v)) = cursor.move_on_next()? {
         database.append(&mut wtxn, k, v)?;
         pb.inc(1);
